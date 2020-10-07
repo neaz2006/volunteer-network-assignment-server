@@ -3,9 +3,9 @@ const app = express();
 require('dotenv').config()
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 const cors = require('cors');
-const  ObjectId  = require('mongodb').ObjectID;
+const ObjectId = require('mongodb').ObjectID;
 app.use(cors());
 
 
@@ -33,26 +33,28 @@ client.connect(err => {
   const humanatys = client.db("volunteerdb").collection("charaty");
   const deletes = client.db("volunteerdb").collection("charaty");
 
+  app.get('/humanatys', (req, res) => {
+    humanatys.find({})
+      .toArray((err, documents) => {
+        res.send(documents);
+      })
+  })
+
+  app.delete('/delete/:id', (req, res) => {
+    deletes.deleteOne({ _id: ObjectId(req.params.id) })
+      .then((result) => {
+        res.send(result.deletedCount > 0);
+      })
+  })
+
   app.post('/addHumanaty', (req, res) => {
     const newHumanaty = req.body;
     humanatys.insertOne(newHumanaty)
       .then(result => {
         console.log(result);
       })
-      
-    app.get('/humanatys', (req, res) => {
-      humanatys.find({})
-        .toArray((err, documents) => {
-          res.send(documents);
-        })
-    })
 
-    app.delete('/delete/:id', (req, res) => {
-        deletes.deleteOne({ _id: ObjectId(req.params.id) })
-        .then((result) => {
-          res.send(result.deletedCount > 0);
-        })
-    })
+
 
   })
 });
